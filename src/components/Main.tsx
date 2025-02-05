@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { Dispatch } from "react";
-import { actionType, userType } from "../types/shared-types";
+import { actionType, stateType } from "../types/shared-types";
 
-interface MainProps {
+type mostUsedProps = StrictOmit<stateType, "numOfUsers">;
+
+type MainProps = mostUsedProps & {
     dispatch: Dispatch<actionType>;
-    users: Array<userType>;
-    selectedUser: string;
 };
 
 function Main({ dispatch, users, message, selectedUser }: MainProps) {
     const [selectedId, setSelectedId] = useState("");
 
-    const User = users.find(u => u.id == Number(selectedId));
+    const User = users.find(u => u.id == selectedId);
     console.log(User)
     const isActive = User?.isActiveAccount;
     const loan = User?.loan;
@@ -29,7 +29,7 @@ function Main({ dispatch, users, message, selectedUser }: MainProps) {
     return (
         <main>
             <div>
-                <div>
+                <div className="flex gap-4">
                     <h2>Account</h2>
                     <input type="text" placeholder="Search Username or ID"
                         value={selectedId} onChange={(e) => handleChange(e)} />

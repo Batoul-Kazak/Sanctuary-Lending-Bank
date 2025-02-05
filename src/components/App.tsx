@@ -4,11 +4,11 @@ import Main from "./Main";
 import { actionType, stateType } from "../types/shared-types";
 
 const initialSate: stateType = {
-    numOfUsers: 1,
+    numOfUsers: 2,
     selectedUser: null,
     message: "",
     users: [{
-        id: 2,
+        id: "1",
         password: "123",
         balance: 0,
         loan: 0,
@@ -16,7 +16,7 @@ const initialSate: stateType = {
         isRequestedLoan: false,
     },
     {
-        id: 2,
+        id: "2",
         password: "1234",
         balance: 10,
         loan: 20,
@@ -121,16 +121,17 @@ function reducer(state: stateType, action: actionType) {
             return { ...state, users };
         }
         case "addUser": {
+            const userData = action.payload;
             const newUser = {
-                id: state.numOfUsers + 1,
-                password: action.payload,
+                id: userData.id,
+                password: userData.password,
                 balance: 0,
                 loan: 0,
                 isActiveAccount: false,
                 isRequestedLoan: false,
             }
             console.log("password: ", action.payload);
-            return { ...state, users: [...state.users, newUser] }
+            return { ...state, users: [...state.users, newUser] };
         }
     }
 }
@@ -141,6 +142,8 @@ type AppProps = React.PropsWithChildren<{
 
 const App: FC<AppProps> = ({ children }) => {
     const [{ users, selectedUser, message }, dispatch] = useReducer(reducer, initialSate);
+
+    console.log(JSON.stringify(users));
 
     return <section className="app">
         <AddUserForm dispatch={dispatch} />
