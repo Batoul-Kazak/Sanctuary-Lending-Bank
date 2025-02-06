@@ -16,7 +16,7 @@ const initialSate: stateType = {
         isRequestedLoan: false,
     },
     {
-        id: "2",
+        id: "n",
         password: "1234",
         balance: 1500,
         loan: 5000,
@@ -30,9 +30,17 @@ function reducer(state: stateType, action: actionType) {
     switch (action.type) {
         case "selectUser":
             {
-                if (state.selectedUser === undefined || state.selectedUser === null)
+                if (action.payload.id === undefined)
                     return { ...state, message: { msg: "undefined user id", isError: true }, selectedUser: "" };
-                return { ...state, selectedUser: action.payload, message: { msg: "", isError: false } };
+                if (action.payload.password === undefined)
+                    return { ...state, message: { msg: "undefined user password", isError: true }, selectedUser: "" };
+
+                const userPassword = state.users.find(user => user.id === action.payload.id);
+
+                if (userPassword?.password !== action.payload.password) {
+                    return { ...state, message: { msg: "wrong password", isError: true }, selectedUser: "" };
+                }
+                return { ...state, selectedUser: action.payload.id, message: { msg: "", isError: false } };
             }
         case "openAccount": {
             const users = state.users.map(user => {
@@ -165,7 +173,7 @@ function reducer(state: stateType, action: actionType) {
                 isActiveAccount: true,
                 isRequestedLoan: false,
             }
-            console.log("password: ", action.payload);
+            m = { ...m, msg: `#use that id is ${userData.id} added successfully` }
             return { ...state, users: [...state.users, newUser], message: m };
         }
     }
@@ -185,7 +193,7 @@ const App: FC<AppProps> = ({ children }) => {
     const [{ users, selectedUser, message }, dispatch] = useReducer(reducer, initialSate);
 
     return <section className="app">
-        <AddUserForm dispatch={dispatch} />
+        <AddUserForm dispatch={dispatch} message={message} />
         <Main dispatch={dispatch} users={users} message={message} selectedUser={selectedUser} />
     </section>
 }

@@ -1,6 +1,7 @@
 
 
-export type actionType = { type: string, payload?: string | undefined | null };
+type obj = { id: string | undefined, password: string | undefined }
+export type actionType = { type: string, payload?: string | undefined | null | obj };
 
 export type userType = {
     id: string;

@@ -10,7 +10,7 @@ type MainProps = mostUsedProps & {
 
 function Main({ dispatch, users, message, selectedUser }: MainProps) {
     const [selectedId, setSelectedId] = useState("");
-    const [disabledButton, setDisabledButton] = useState(true);
+    const [password, setPassword] = useState("");
 
     console.log(selectedId, " ", selectedUser);
 
@@ -20,34 +20,28 @@ function Main({ dispatch, users, message, selectedUser }: MainProps) {
     const loan = User?.loan;
     const balance = User?.balance;
     const isRequestedLoan = User?.isRequestedLoan;
-
-    function handleChange(e) {
-        if (e.target.value === "" || e.target.value === null || e.target.value === undefined) {
-            setSelectedId(e.target.value);
-            message = "";
-            setDisabledButton(true);
-            return dispatch({ type: "selectUser", payload: null });
-        }
-        else {
-            setSelectedId(e.target.value);
-            setDisabledButton(false);
-            return dispatch({ type: "selectUser", payload: selectedId });
-        }
-    }
+    // { isActive, loan, balance, isRequestedLoan } = User;
 
     function handleSelect() {
-        dispatch({ type: "selectUser", payload: selectedId });
-        setDisabledButton(true);
+        if (!selectedId && !password) {
+            return dispatch({ type: "selectUser", payload: { id: undefined, password: undefined } });
+        }
+
+        if (selectedId && !password)
+            return dispatch({ type: "selectUser", payload: { id: selectedId, password: undefined } });
+
+        return dispatch({ type: "selectUser", payload: { id: selectedId, password: password } });
     }
 
     return (
         <main>
             <div>
+                <h2>Account</h2>
                 <div className="flex gap-4">
-                    <h2>Account</h2>
                     <input type="text" placeholder="Search Username or ID"
-                        value={selectedId} onChange={(e) => handleChange(e)} />
-                    <button disabled={disabledButton} onClick={handleSelect}>select</button>
+                        value={selectedId} onChange={(e) => setSelectedId(e.target.value)} />
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter user id" />
+                    <button onClick={handleSelect}>select</button>
                 </div>
                 <p className="message" style={message.isError ? { color: "red" } : { color: "green" }}>{message.msg?.startsWith("#") ? "" : message.msg}</p>
             </div>
