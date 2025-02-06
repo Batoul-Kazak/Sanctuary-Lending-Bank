@@ -60,7 +60,7 @@ function Main({ dispatch, users, message, selectedUser }: MainProps) {
                         onClick={() => dispatch({ type: "withdraw" })} >Withdraw 50</button>
                     <div className="flex gap-4 p-5">
                         <p className="text">Select loan to request:</p>
-                        <select value={requestedLoan} onChange={(e) => setRequestedLoan(e.target.value)}>
+                        <select value={requestedLoan} onChange={(e) => setRequestedLoan(e.target.value)} disabled={!isActive}>
                             <option value="50">50$</option>
                             <option value="100">100$</option>
                             <option value="500">500$</option>
@@ -72,7 +72,7 @@ function Main({ dispatch, users, message, selectedUser }: MainProps) {
                             <option value="50000">50,000$</option>
                         </select>
                         <button disabled={!isActive}
-                            onClick={() => dispatch({ type: "requestLoan", payload: requestedLoan })}>request loan of {requestedLoan}$</button>
+                            onClick={() => dispatch({ type: "requestLoan", payload: requestedLoan })}>{isActive ? `request loan of ${requestedLoan}$` : "request loan of 0"}</button>
                     </div>
                     <button
                         disabled={!isActive}

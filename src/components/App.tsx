@@ -51,7 +51,7 @@ function reducer(state: stateType, action: actionType) {
         }
         case "closeAccount":
             {
-                let m: messageType;
+                let m: messageType = { msg: "", isError: false };
                 const users = state.users.map(user => {
                     if (user.id == state.selectedUser) {
                         if (user.balance > 0 || user.loan) {
