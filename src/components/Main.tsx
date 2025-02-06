@@ -10,6 +10,7 @@ type MainProps = mostUsedProps & {
 
 function Main({ dispatch, users, message, selectedUser }: MainProps) {
     const [selectedId, setSelectedId] = useState("");
+    const [disabledButton, setDisabledButton] = useState(true);
 
     console.log(selectedId, " ", selectedUser);
 
@@ -21,15 +22,22 @@ function Main({ dispatch, users, message, selectedUser }: MainProps) {
     const isRequestedLoan = User?.isRequestedLoan;
 
     function handleChange(e) {
-        if (e.target.value === "") {
+        if (e.target.value === "" || e.target.value === null || e.target.value === undefined) {
             setSelectedId(e.target.value);
             message = "";
+            setDisabledButton(true);
             return dispatch({ type: "selectUser", payload: null });
         }
         else {
             setSelectedId(e.target.value);
+            setDisabledButton(false);
             return dispatch({ type: "selectUser", payload: selectedId });
         }
+    }
+
+    function handleSelect() {
+        dispatch({ type: "selectUser", payload: selectedId });
+        setDisabledButton(true);
     }
 
     return (
@@ -39,14 +47,14 @@ function Main({ dispatch, users, message, selectedUser }: MainProps) {
                     <h2>Account</h2>
                     <input type="text" placeholder="Search Username or ID"
                         value={selectedId} onChange={(e) => handleChange(e)} />
-                    <button onClick={() => dispatch({ type: "selectUser", payload: selectedId })}>select</button>
+                    <button disabled={disabledButton} onClick={handleSelect}>select</button>
                 </div>
-                <p className="red">{message}</p>
+                <p className="red">{message?.startsWith("#") ? "" : message}</p>
             </div>
-            {selectedUser &&
+            {selectedUser && User &&
                 <>
-                    <p>Balance: {balance}</p>
-                    <p>Loan: {loan}</p>
+                    <p><span>Balance:</span> {balance}$</p>
+                    <p><span>Loan:</span> {loan}$</p>
                     <button
                         disabled={isActive}
                         onClick={() => dispatch({ type: "openAccount" })}>Open account</button>

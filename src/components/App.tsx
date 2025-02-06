@@ -18,27 +18,21 @@ const initialSate: stateType = {
     {
         id: "2",
         password: "1234",
-        balance: 10,
-        loan: 20,
+        balance: 5000,
+        loan: 5200,
         isActiveAccount: true,
-        isRequestedLoan: false,
+        isRequestedLoan: true,
     }
     ]
 }
-
-// type myType = {
-//     x: Pick<string, "anchor" | "big">
-//     y: Omit<string, "boiuyt">
-//     z: StrictOmit<string, "bigw">
-// };
 
 function reducer(state: stateType, action: actionType) {
     switch (action.type) {
         case "selectUser":
             {
                 if (state.selectedUser === undefined || state.selectedUser === null)
-                    return { ...state, selectedUser: "" };
-                return { ...state, selectedUser: action.payload };
+                    return { ...state, message: "undefined user id", selectedUser: "" };
+                return { ...state, selectedUser: action.payload, message: "" };
             }
         case "openAccount": {
             const users = state.users.map(user => {
@@ -47,85 +41,124 @@ function reducer(state: stateType, action: actionType) {
                 }
                 return user;
             });
-            return { ...state, users };
+            return { ...state, users, message: "" };
         }
         case "closeAccount":
             {
+                let m: string = "";
                 const users = state.users.map(user => {
                     if (user.id == state.selectedUser) {
                         if (user.balance > 0 || user.loan) {
-                            state.message = `can't close account, because your ${user.balance > 0 ? "balance" : user.loan > 0 ? "loan" : "balance and loan"} is not zero`;
+                            m = `can't close account, because your ${user.balance > 0 ? "balance" : user.loan > 0 ? "loan" : "balance and loan"} is not zero`;
                             return user;
                         }
-                        else
+                        else {
+                            // m = "";
                             return { ...user, isActiveAccount: false };
+                        }
                     }
                     return user;
                 });
-                return { ...state, users };
+                return { ...state, users, message: m };
             }
         case "deposit": {
             const users = state.users.map(user =>
                 user.id == state.selectedUser ? { ...user, balance: user.balance + 150 } : user);
-            return { ...state, users };
+            return { ...state, users, message: "" };
         }
         case "withdraw": {
-            const users = state.users.map(user => {
-                if (user.id == state.selectedUser)
-                    return { ...user, balance: user.balance > 0 ? user.balance - 50 : user.balance }
-                if (user.balance == 0) {
-                    state.message = "your balance is zero, you can't withdraw";
-                    return user;
+            let message = "";
+            const updatedUsers = state.users.map(user => {
+                if (user.id == state.selectedUser) {
+                    if (user.balance > 0) {
+                        return { ...user, balance: user.balance - 50 };
+                    } else {
+                        message = "user's balance is zero, you can't withdraw";
+                        return user;
+                    }
                 }
+                return user;
             });
-            return { ...state, users };
+
+            return { ...state, users: updatedUsers, message };
         }
         case "requestLoan": {
+            let m: string = "";
             const users = state.users.map(user => {
                 if (user.id == state.selectedUser) {
-                    return {
-                        ...user, balance: user.isRequestedLoan === true ? user.balance : user.balance + 5000,
-                        loan: user.isRequestedLoan === true ? user.loan : user.loan + 5000,
-                        isRequestedLoan: true
+                    if (!user.isRequestedLoan) {
+                        m = "user requested 5000$ successfully"
+                        return {
+                            ...user, balance: user.balance + 5000, loan: user.loan + 5000, isRequestedLoan: true
+                        }
+                    }
+                    else {
+                        m = "user can't request loan, you should first pay the loan that you already have";
+                        return user;
                     }
                 }
-                if (user.isRequestedLoan) {
-                    state.message = "you can't request loan, you should first pay the loan that you already have";
-                    return user;
-                }
-                else {
-                    console.log("you requested 5000$ successfully");
-                }
+                return user;
             });
-            return { ...state, users };
+            return { ...state, users: users, message: m };
         }
         case "payLoan": {
+            let m: string = "";
             const users = state.users.map(user => {
                 if (user.id == state.selectedUser) {
-                    return {
-                        ...user, balance: user.isRequestedLoan === false ? user.balance : user.balance - 5000,
-                        loan: user.isRequestedLoan === false ? user.loan : user.loan - 5000,
-                        isRequestedLoan: false
+                    if (user.isRequestedLoan) {
+                        m = "user paid the loan successfully"
+                        return {
+                            ...user, balance: user.balance - 5000, loan: user.loan - 5000, isRequestedLoan: false
+                        }
+                    }
+                    else {
+                        m = "user doesn't have loan to pay";
+                        return user;
                     }
                 }
-                if (user.isRequestedLoan === false) {
-                    state.message = "you can't request loan, you should first pay the loan that you already have";
-                    return user;
-                }
-                else {
-                    state.message = "you payed the loan successfully";
-                }
+                return user;
             });
-            return { ...state, users };
+            return { ...state, users: users, message: m };
         }
         case "addUser": {
+            let m: string = "";
             const userData = action.payload;
+            // const password = userData.password;
+
+            if (userData === undefined && userData === null) {
+                m = "fill user information";
+                return { ...state, message: m };
+            }
+
+            if (!(userData.password)) {
+                m = "#user must have password";
+                return { ...state, message: m };
+            }
+
+            if (userData.password.length < 8) {
+                m = "#user password must be more than 8 characters";
+                return { ...state, message: m };
+            }
+
+            const isExist = state.users.find(user => user.id == userData.id);
+            if (isExist) {
+                m = "#user already exists";
+                return { ...state, message: m };
+            }
+
+            if (!(userData.id)) {
+                m = "#user must have an id";
+                return { ...state, message: m };
+            }
+
+            console.log(userData.id, " ", userData.password);
+
             const newUser = {
                 id: userData.id,
                 password: userData.password,
                 balance: 0,
                 loan: 0,
-                isActiveAccount: false,
+                isActiveAccount: true,
                 isRequestedLoan: false,
             }
             console.log("password: ", action.payload);
@@ -133,6 +166,12 @@ function reducer(state: stateType, action: actionType) {
         }
     }
 }
+
+// type myType = {
+//     x: Pick<string, "anchor" | "big">
+//     y: Omit<string, "boiuyt">
+//     z: StrictOmit<string, "bigw">
+// };
 
 type AppProps = React.PropsWithChildren<{
     name: string;
