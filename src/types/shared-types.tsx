@@ -11,9 +11,11 @@ export type userType = {
     isRequestedLoan: boolean;
 };
 
+export type messageType = { msg: string | null, isError: boolean };
+
 export type stateType = {
     numOfUsers: number;
     selectedUser: string | null | undefined;
-    message: string | null;
+    message: messageType;
     users: Array<userType>;
 }

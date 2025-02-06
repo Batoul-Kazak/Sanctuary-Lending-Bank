@@ -49,7 +49,7 @@ function Main({ dispatch, users, message, selectedUser }: MainProps) {
                         value={selectedId} onChange={(e) => handleChange(e)} />
                     <button disabled={disabledButton} onClick={handleSelect}>select</button>
                 </div>
-                <p className="red">{message?.startsWith("#") ? "" : message}</p>
+                <p className="message" style={message.isError ? { color: "red" } : { color: "green" }}>{message.msg?.startsWith("#") ? "" : message.msg}</p>
             </div>
             {selectedUser && User &&
                 <>

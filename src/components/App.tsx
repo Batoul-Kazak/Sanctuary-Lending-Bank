@@ -1,12 +1,12 @@
 import { FC, useReducer } from "react";
 import AddUserForm from "./AddUserForm";
 import Main from "./Main";
-import { actionType, stateType } from "../types/shared-types";
+import { actionType, messageType, stateType } from "../types/shared-types";
 
 const initialSate: stateType = {
     numOfUsers: 2,
     selectedUser: null,
-    message: "",
+    message: { msg: "", isError: false },
     users: [{
         id: "1",
         password: "123",
@@ -18,8 +18,8 @@ const initialSate: stateType = {
     {
         id: "2",
         password: "1234",
-        balance: 5000,
-        loan: 5200,
+        balance: 1500,
+        loan: 5000,
         isActiveAccount: true,
         isRequestedLoan: true,
     }
@@ -31,8 +31,8 @@ function reducer(state: stateType, action: actionType) {
         case "selectUser":
             {
                 if (state.selectedUser === undefined || state.selectedUser === null)
-                    return { ...state, message: "undefined user id", selectedUser: "" };
-                return { ...state, selectedUser: action.payload, message: "" };
+                    return { ...state, message: { msg: "undefined user id", isError: true }, selectedUser: "" };
+                return { ...state, selectedUser: action.payload, message: { msg: "", isError: false } };
             }
         case "openAccount": {
             const users = state.users.map(user => {
@@ -41,19 +41,21 @@ function reducer(state: stateType, action: actionType) {
                 }
                 return user;
             });
-            return { ...state, users, message: "" };
+            return { ...state, users, message: { msg: "", isError: false } };
         }
         case "closeAccount":
             {
-                let m: string = "";
+                let m: messageType;
                 const users = state.users.map(user => {
                     if (user.id == state.selectedUser) {
                         if (user.balance > 0 || user.loan) {
-                            m = `can't close account, because your ${user.balance > 0 ? "balance" : user.loan > 0 ? "loan" : "balance and loan"} is not zero`;
+                            m = {
+                                msg: `can't close account, because your ${user.balance > 0 ? "balance" : user.loan > 0 ? "loan" :
+                                    "balance and loan"} is not zero`, isError: true
+                            };
                             return user;
                         }
                         else {
-                            // m = "";
                             return { ...user, isActiveAccount: false };
                         }
                     }
@@ -64,36 +66,37 @@ function reducer(state: stateType, action: actionType) {
         case "deposit": {
             const users = state.users.map(user =>
                 user.id == state.selectedUser ? { ...user, balance: user.balance + 150 } : user);
-            return { ...state, users, message: "" };
+            return { ...state, users, message: { msg: "deposit 150$ successfully", isError: false } };
         }
         case "withdraw": {
-            let message = "";
+            let m: messageType = { msg: "", isError: false };
             const updatedUsers = state.users.map(user => {
                 if (user.id == state.selectedUser) {
                     if (user.balance > 0) {
+                        m = { ...m, msg: "user withdraws 50$" };
                         return { ...user, balance: user.balance - 50 };
                     } else {
-                        message = "user's balance is zero, you can't withdraw";
+                        m = { msg: "user's balance is zero, you can't withdraw", isError: true };
                         return user;
                     }
                 }
                 return user;
             });
 
-            return { ...state, users: updatedUsers, message };
+            return { ...state, users: updatedUsers, message: m };
         }
         case "requestLoan": {
-            let m: string = "";
+            let m: messageType = { msg: "", isError: false };
             const users = state.users.map(user => {
                 if (user.id == state.selectedUser) {
                     if (!user.isRequestedLoan) {
-                        m = "user requested 5000$ successfully"
+                        m = { ...m, msg: "user requested 5000$ successfully" };
                         return {
                             ...user, balance: user.balance + 5000, loan: user.loan + 5000, isRequestedLoan: true
                         }
                     }
                     else {
-                        m = "user can't request loan, you should first pay the loan that you already have";
+                        m = { msg: "user can't request loan, you should first pay the loan that you already have", isError: true };
                         return user;
                     }
                 }
@@ -102,17 +105,18 @@ function reducer(state: stateType, action: actionType) {
             return { ...state, users: users, message: m };
         }
         case "payLoan": {
-            let m: string = "";
+            let m: messageType = { msg: "", isError: false };
             const users = state.users.map(user => {
                 if (user.id == state.selectedUser) {
                     if (user.isRequestedLoan) {
-                        m = "user paid the loan successfully"
+                        // if(user.b)
+                        m = { ...m, msg: "user paid the loan successfully" }
                         return {
                             ...user, balance: user.balance - 5000, loan: user.loan - 5000, isRequestedLoan: false
                         }
                     }
                     else {
-                        m = "user doesn't have loan to pay";
+                        m = { msg: "user doesn't have loan to pay", isError: true };
                         return user;
                     }
                 }
@@ -121,33 +125,33 @@ function reducer(state: stateType, action: actionType) {
             return { ...state, users: users, message: m };
         }
         case "addUser": {
-            let m: string = "";
+            let m: messageType = { msg: "", isError: false };
             const userData = action.payload;
             // const password = userData.password;
 
             if (userData === undefined && userData === null) {
-                m = "fill user information";
+                m = { msg: "fill user information", isError: true };
                 return { ...state, message: m };
             }
 
             if (!(userData.password)) {
-                m = "#user must have password";
+                m = { msg: "#user must have password", isError: true };
                 return { ...state, message: m };
             }
 
             if (userData.password.length < 8) {
-                m = "#user password must be more than 8 characters";
+                m = { msg: "#user password must be more than 8 characters", isError: false };
                 return { ...state, message: m };
             }
 
             const isExist = state.users.find(user => user.id == userData.id);
             if (isExist) {
-                m = "#user already exists";
+                m = { msg: "#user already exists", isError: true };
                 return { ...state, message: m };
             }
 
             if (!(userData.id)) {
-                m = "#user must have an id";
+                m = { msg: "#user must have an id", isError: true };
                 return { ...state, message: m };
             }
 
@@ -162,7 +166,7 @@ function reducer(state: stateType, action: actionType) {
                 isRequestedLoan: false,
             }
             console.log("password: ", action.payload);
-            return { ...state, users: [...state.users, newUser] };
+            return { ...state, users: [...state.users, newUser], message: m };
         }
     }
 }
