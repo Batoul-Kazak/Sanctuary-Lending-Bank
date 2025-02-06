@@ -12,7 +12,7 @@ const initialSate: stateType = {
         password: "123",
         balance: 0,
         loan: 0,
-        isActiveAccount: false,
+        isActiveAccount: true,
         isRequestedLoan: false,
     },
     {
@@ -36,7 +36,7 @@ function reducer(state: stateType, action: actionType) {
     switch (action.type) {
         case "selectUser":
             {
-                if (state.selectedUser === undefined)
+                if (state.selectedUser === undefined || state.selectedUser === null)
                     return { ...state, selectedUser: "" };
                 return { ...state, selectedUser: action.payload };
             }
@@ -65,10 +65,8 @@ function reducer(state: stateType, action: actionType) {
                 return { ...state, users };
             }
         case "deposit": {
-            const users = state.users.map(user => {
-                if (user.id == state.selectedUser)
-                    return { ...user, balance: user.balance + 150 }
-            });
+            const users = state.users.map(user =>
+                user.id == state.selectedUser ? { ...user, balance: user.balance + 150 } : user);
             return { ...state, users };
         }
         case "withdraw": {
@@ -142,8 +140,6 @@ type AppProps = React.PropsWithChildren<{
 
 const App: FC<AppProps> = ({ children }) => {
     const [{ users, selectedUser, message }, dispatch] = useReducer(reducer, initialSate);
-
-    console.log(JSON.stringify(users));
 
     return <section className="app">
         <AddUserForm dispatch={dispatch} />

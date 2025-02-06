@@ -1,6 +1,6 @@
 
 
-export type actionType = { type: string, payload?: string | number };
+export type actionType = { type: string, payload?: string | undefined | null };
 
 export type userType = {
     id: string;
@@ -13,7 +13,7 @@ export type userType = {
 
 export type stateType = {
     numOfUsers: number;
-    selectedUser: string | null;
+    selectedUser: string | null | undefined;
     message: string | null;
     users: Array<userType>;
 }

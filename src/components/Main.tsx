@@ -11,8 +11,10 @@ type MainProps = mostUsedProps & {
 function Main({ dispatch, users, message, selectedUser }: MainProps) {
     const [selectedId, setSelectedId] = useState("");
 
-    const User = users.find(u => u.id == selectedId);
-    console.log(User)
+    console.log(selectedId, " ", selectedUser);
+
+    const User = users.find(u => u.id.toString() === (selectedId).toString());
+    console.log(User);
     const isActive = User?.isActiveAccount;
     const loan = User?.loan;
     const balance = User?.balance;
@@ -21,9 +23,13 @@ function Main({ dispatch, users, message, selectedUser }: MainProps) {
     function handleChange(e) {
         if (e.target.value === "") {
             setSelectedId(e.target.value);
-            return dispatch({ type: "selectUser", payload: "" });
+            message = "";
+            return dispatch({ type: "selectUser", payload: null });
         }
-        setSelectedId(e.target.value);
+        else {
+            setSelectedId(e.target.value);
+            return dispatch({ type: "selectUser", payload: selectedId });
+        }
     }
 
     return (
@@ -35,7 +41,7 @@ function Main({ dispatch, users, message, selectedUser }: MainProps) {
                         value={selectedId} onChange={(e) => handleChange(e)} />
                     <button onClick={() => dispatch({ type: "selectUser", payload: selectedId })}>select</button>
                 </div>
-                <p>{message}</p>
+                <p className="red">{message}</p>
             </div>
             {selectedUser &&
                 <>
