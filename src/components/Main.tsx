@@ -11,6 +11,7 @@ type MainProps = mostUsedProps & {
 function Main({ dispatch, users, message, selectedUser }: MainProps) {
     const [selectedId, setSelectedId] = useState("");
     const [password, setPassword] = useState("");
+    const [requestedLoan, setRequestedLoan] = useState(0);
 
     console.log(selectedId, " ", selectedUser);
 
@@ -19,7 +20,6 @@ function Main({ dispatch, users, message, selectedUser }: MainProps) {
     const isActive = User?.isActiveAccount;
     const loan = User?.loan;
     const balance = User?.balance;
-    const isRequestedLoan = User?.isRequestedLoan;
     // { isActive, loan, balance, isRequestedLoan } = User;
 
     function handleSelect() {
@@ -58,11 +58,24 @@ function Main({ dispatch, users, message, selectedUser }: MainProps) {
                     <button
                         disabled={!isActive}
                         onClick={() => dispatch({ type: "withdraw" })} >Withdraw 50</button>
+                    <div className="flex gap-4 p-5">
+                        <p className="text">Select loan to request:</p>
+                        <select value={requestedLoan} onChange={(e) => setRequestedLoan(e.target.value)}>
+                            <option value="50">50$</option>
+                            <option value="100">100$</option>
+                            <option value="500">500$</option>
+                            <option value="1000">1000$</option>
+                            <option value="2000">2000$</option>
+                            <option value="5000">5000$</option>
+                            <option value="10000">10,000$</option>
+                            <option value="20000">20,000$</option>
+                            <option value="50000">50,000$</option>
+                        </select>
+                        <button disabled={!isActive}
+                            onClick={() => dispatch({ type: "requestLoan", payload: requestedLoan })}>request loan of {requestedLoan}$</button>
+                    </div>
                     <button
-                        disabled={!isActive || isRequestedLoan}
-                        onClick={() => dispatch({ type: "requestLoan" })}>Request a loan of 5000</button>
-                    <button
-                        disabled={!isActive || !isRequestedLoan}
+                        disabled={!isActive}
                         onClick={() => dispatch({ type: "payLoan" })}>Pay loan</button>
                     <button
                         disabled={!isActive}

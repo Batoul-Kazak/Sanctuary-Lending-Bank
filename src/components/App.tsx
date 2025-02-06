@@ -13,7 +13,6 @@ const initialSate: stateType = {
         balance: 0,
         loan: 0,
         isActiveAccount: true,
-        isRequestedLoan: false,
     },
     {
         id: "n",
@@ -21,7 +20,6 @@ const initialSate: stateType = {
         balance: 1500,
         loan: 5000,
         isActiveAccount: true,
-        isRequestedLoan: true,
     }
     ]
 }
@@ -95,16 +93,17 @@ function reducer(state: stateType, action: actionType) {
         }
         case "requestLoan": {
             let m: messageType = { msg: "", isError: false };
+            const requestAmount: number = Number(action.payload);
             const users = state.users.map(user => {
                 if (user.id == state.selectedUser) {
-                    if (!user.isRequestedLoan) {
-                        m = { ...m, msg: "user requested 5000$ successfully" };
+                    if (user.loan < 100000) {
+                        m = { ...m, msg: `user requested ${requestAmount} successfully` };
                         return {
-                            ...user, balance: user.balance + 5000, loan: user.loan + 5000, isRequestedLoan: true
+                            ...user, balance: user.balance + requestAmount, loan: user.loan + requestAmount
                         }
                     }
                     else {
-                        m = { msg: "user can't request loan, you should first pay the loan that you already have", isError: true };
+                        m = { msg: "user can't request more than 100,000, you should first pay the loan that you already have", isError: true };
                         return user;
                     }
                 }
@@ -116,14 +115,16 @@ function reducer(state: stateType, action: actionType) {
             let m: messageType = { msg: "", isError: false };
             const users = state.users.map(user => {
                 if (user.id == state.selectedUser) {
-                    if (user.isRequestedLoan) {
-                        // if(user.b)
+                    if (user.balance - user.loan >= 0) {
                         m = { ...m, msg: "user paid the loan successfully" }
                         return {
-                            ...user, balance: user.balance - 5000, loan: user.loan - 5000, isRequestedLoan: false
+                            ...user, balance: user.balance - user.loan, loan: 0
                         }
                     }
-                    else {
+                    else if (user.balance - user.loan < 0) {
+                        m = { msg: "failed to pay loan, user balance is less than the loan", isError: true };
+                        return user;
+                    } else if (user.loan === 0) {
                         m = { msg: "user doesn't have loan to pay", isError: true };
                         return user;
                     }
@@ -170,8 +171,7 @@ function reducer(state: stateType, action: actionType) {
                 password: userData.password,
                 balance: 0,
                 loan: 0,
-                isActiveAccount: true,
-                isRequestedLoan: false,
+                isActiveAccount: true
             }
             m = { ...m, msg: `#use that id is ${userData.id} added successfully` }
             return { ...state, users: [...state.users, newUser], message: m };

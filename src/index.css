@@ -80,3 +80,15 @@ h2 {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+.text {
+  color: black;
+  margin: 1rem;
+}
+
+select {
+  color: green;
+  border: 1px solid black;
+  border-radius: 1rem;
+  font-weight: bold;
+}

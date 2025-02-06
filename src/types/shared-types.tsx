@@ -1,7 +1,7 @@
 
 
 type obj = { id: string | undefined, password: string | undefined }
-export type actionType = { type: string, payload?: string | undefined | null | obj };
+export type actionType = { type: string, payload?: string | undefined | null | obj | number };
 
 export type userType = {
     id: string;
@@ -9,7 +9,6 @@ export type userType = {
     isActiveAccount: boolean;
     balance: number;
     loan: number;
-    isRequestedLoan: boolean;
 };
 
 export type messageType = { msg: string | null, isError: boolean };
